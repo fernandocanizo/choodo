@@ -23,15 +23,17 @@ app.model({
 const hTodoLi = (todo) => html`<li>${todo.title}</li>`;
 
 const view = (state, prevState, send) => {
+  const onTaskSubmition = (e) => {
+    const userInput = e.target.children[0];
+    send('addTodo', { title: userInput.value });
+    userInput.value = '';
+    e.preventDefault();
+  };
+
   return html`
     <div>
       <h1>ChooDo</h1>
-      <form onsubmit=${(e) => {
-        const userInput = e.target.children[0]
-        send('addTodo', { title: userInput.value })
-        userInput.value = ''
-        e.preventDefault()
-        }}>
+      <form onsubmit=${onTaskSubmition}>
 
         <input type="text" placeholder="Write your next task here..." id="title" autofocus>
       </form>
