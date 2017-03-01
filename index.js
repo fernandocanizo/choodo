@@ -7,10 +7,16 @@ const app = choo();
 
 app.model({
   state: {
-    todos: [
-      { title: 'Buy milk' },
-      { title: 'Call Samantha'},
-    ],
+    todos: [],
+  },
+  reducers: {
+    addTodo: (state, data) => {
+      const newTodos = state.todos.slice();
+      newTodos.push(data);
+      return {
+        todos: newTodos,
+      };
+  },
   },
 });
 
@@ -20,6 +26,16 @@ const view = (state, prevState, send) => {
   return html`
     <div>
       <h1>ChooDo</h1>
+      <form onsubmit=${(e) => {
+        const userInput = e.target.children[0]
+        send('addTodo', { title: userInput.value })
+        userInput.value = ''
+        e.preventDefault()
+        }}>
+
+        <input type="text" placeholder="Write your next task here..." id="title" autofocus>
+      </form>
+
       <ul>
         ${state.todos.map(hTodoLi)}
       </ul>
