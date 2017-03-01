@@ -1,5 +1,6 @@
 'use strict';
 
+const extend = require('xtend');
 const choo = require('choo');
 const html = require('choo/html');
 const app = choo();
@@ -11,6 +12,9 @@ app.model({
   },
   reducers: {
     addTodo: (state, data) => {
+      const todo = extend(data, {
+        completed: false,
+      });
       const newTodos = state.todos.slice();
       newTodos.push(data);
       return {
@@ -20,7 +24,11 @@ app.model({
   },
 });
 
-const hTodoLi = (todo) => html`<li>${todo.title}</li>`;
+const hTodoLi = (todo) => html`
+  <li>
+    <input type="checkbox" ${todo.completed ? 'checked' : ''} />
+    ${todo.title}
+  </li>`;
 
 const view = (state, prevState, send) => {
   const onTaskSubmition = (e) => {
