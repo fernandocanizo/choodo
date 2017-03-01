@@ -14,12 +14,14 @@ app.model({
   },
 });
 
+const hTodoLi = (todo) => html`<li>${todo.title}</li>`;
+
 const view = (state, prevState, send) => {
   return html`
     <div>
       <h1>ChooDo</h1>
       <ul>
-        ${state.todos.map((todo) => html`<li>${todo.title}</li>`)}
+        ${state.todos.map(hTodoLi)}
       </ul>
     </div>
 `;
