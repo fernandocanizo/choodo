@@ -7,6 +7,10 @@
     "start": "budo index.js --live --open",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fernandocanizo/choodo.git"
+  },
   "author": "Fernando L. Canizo <fernandocanizo@gmail.com>",
   "license": "MIT",
   "dependencies": {
