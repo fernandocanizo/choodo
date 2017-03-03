@@ -20,15 +20,17 @@ app.model({
       return {
         todos: newTodos,
       };
-  },
+    },
+
+    updateTodo: (state, data) => {
+      const newTodos = state.todos.slice();
+      const oldTask = newTodos[data.index];
+      const newTask = extend(oldTask, data.update);
+      newTodos[data.index] = newTask;
+      return { todos : newTodos };
+    },
   },
 });
-
-const hTodoLi = (todo) => html`
-  <li>
-    <input type="checkbox" ${todo.completed ? 'checked' : ''} />
-    ${todo.title}
-  </li>`;
 
 const view = (state, prevState, send) => {
   const onTaskSubmition = (e) => {
@@ -38,10 +40,26 @@ const view = (state, prevState, send) => {
     e.preventDefault();
   };
 
+  const onTaskChecked = (e, index) => {
+    const update = { completed: e.target.checked }
+    send('updateTodo', { index: index, update: update })
+  };
+
+  const hTodoLi = (todo, index) => {
+    const checked = todo.completed ? 'checked' : '';
+    const onChange = (e) => onTaskChecked(e, index);
+
+    return html`
+      <li>
+        <input type="checkbox" ${ checked } onchange=${ onChange } />
+        ${todo.title}
+      </li>`;
+  };
+
   return html`
     <div>
       <h1>ChooDo</h1>
-      <form onsubmit=${onTaskSubmition}>
+      <form onsubmit=${ onTaskSubmition }>
 
         <input type="text" placeholder="Write your next task here..." id="title" autofocus>
       </form>
