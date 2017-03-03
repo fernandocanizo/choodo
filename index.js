@@ -5,42 +5,17 @@ const choo = require('choo');
 const html = require('choo/html');
 const app = choo();
 
-// localStorage wrapper
-const store = {
-  getAll: (storeName, cb) => {
-    try {
-      cb(JSON.parse(window.localStorage[storeName]));
-    } catch (e) {
-      cb([]);
-    }
-  },
-
-  add: (storeName, item, cb) => {
-    store.getAll(storeName, (items) => {
-      items.push(item);
-      window.localStorage[storeName] = JSON.stringify(items);
-      cb();
-    });
-  },
-
-  replace: (storeName, index, item, cb) => {
-    store.getAll(storeName, (items) => {
-      items[index] = item;
-      window.localStorage[storeName] = JSON.stringify(items);
-      cb();
-    });
-  },
-};
-
 app.model({
   state: {
     todos: [],
   },
+
   reducers: {
-    addTodo: (state, data) => {
-      const todo = extend(data, {
-        completed: false,
-      });
+    receiveTodos: (state, data) => {
+      return { todos: data };
+    },
+
+    receiveNewTodo: (data, state) => {
       const newTodos = state.todos.slice();
       newTodos.push(data);
       return {
@@ -48,12 +23,36 @@ app.model({
       };
     },
 
-    updateTodo: (state, data) => {
+    replaceTodo: (state, data) => {
       const newTodos = state.todos.slice();
-      const oldTask = newTodos[data.index];
-      const newTask = extend(oldTask, data.update);
-      newTodos[data.index] = newTask;
-      return { todos : newTodos };
+      newTodos[data.index] = data.todo;
+      return {
+        todos: newTodos
+      };
+    },
+  },
+
+  effects: {
+    getTodos: (state, data, send, done) => {
+      store.getAll('todos', (todos) => {
+        send('receiveTodos', todos, done);
+      });
+    },
+
+    addTodo: (data, state, send, done) => {
+      const todo = extend(data, { completed: false });
+      store.add('todos', todo, () => {
+        send('receiveNewTodo', todo, done);
+      });
+    },
+
+    updateTodo: (state, data, send, done) => {
+      const oldTodo = state.todos[data.index];
+      const newTodo = extend(oldTodo, data.updates);
+
+      store.replace('todos', data.index, newTodo, () => {
+        send('replaceTodo', { index: data.index, todo: newTodo }, done);
+      });
     },
   },
 });
@@ -83,7 +82,7 @@ const view = (state, prevState, send) => {
   };
 
   return html`
-    <div>
+    <div onload=${() => send('getTodos')}>
       <h1>ChooDo</h1>
       <form onsubmit=${ onTaskSubmition }>
 
@@ -103,3 +102,32 @@ app.router([
 
 const tree = app.start();
 document.body.appendChild(tree);
+
+// localStorage wrapper
+const store = {
+  getAll: (storeName, cb) => {
+    try {
+      cb(JSON.parse(window.localStorage[storeName]));
+    } catch (e) {
+      cb([]);
+    }
+  },
+
+  add: (storeName, item, cb) => {
+    store.getAll(storeName, (items) => {
+      items.push(item);
+      window.localStorage[storeName] = JSON.stringify(items);
+      cb();
+    });
+  },
+
+  replace: (storeName, index, item, cb) => {
+    store.getAll(storeName, (items) => {
+      items[index] = item;
+      window.localStorage[storeName] = JSON.stringify(items);
+      cb();
+    });
+  },
+};
+
+
